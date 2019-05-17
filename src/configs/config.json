@@ -1,5 +1,5 @@
 {
-    "name": "Mnist_LeNet",
+    "name": "8BitQuantized",
     "n_gpu": 1,
 
     "arch": {
@@ -7,10 +7,10 @@
         "args": {}
     },
     "data_loader": {
-        "type": "MnistDataLoader",
+        "type": "LFWDataLoader",
         "args":{
-            "data_dir": "data/",
-            "batch_size": 128,
+            "data_dir": "../datasets/lfw-deepfunneled",
+            "batch_size": 16,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 2
