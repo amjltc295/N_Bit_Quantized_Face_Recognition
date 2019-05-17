@@ -1,3 +1,4 @@
+# From https://github.com/ZhaoJ9014/face.evoLVe.PyTorch/blob/master/head/metrics.py
 from __future__ import print_function
 from __future__ import division
 import torch
@@ -26,7 +27,7 @@ class Softmax(nn.Module):
         self.weight = Parameter(torch.FloatTensor(out_features, in_features))
         self.bias = Parameter(torch.FloatTensor(out_features))
         nn.init.xavier_uniform_(self.weight)
-        nn.init.zero_(self.bias)
+        nn.init.zeros_(self.bias)
 
     def forward(self, x):
         if self.device_id == None:
@@ -50,17 +51,17 @@ class Softmax(nn.Module):
             if isinstance(m, nn.Conv2d):
                 nn.init.xavier_uniform_(m.weight.data)
                 if m.bias is not None:
-                    m.bias.data.zero_()
+                    m.bias.data.zeros_()
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                m.bias.data.zeros_()
             elif isinstance(m, nn.BatchNorm1d):
                 m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                m.bias.data.zeros_()
             elif isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight.data)
                 if m.bias is not None:
-                    m.bias.data.zero_()
+                    m.bias.data.zeros_()
 
 
 class ArcFace(nn.Module):
