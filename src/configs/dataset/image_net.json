@@ -1,0 +1,12 @@
+{
+    "data_loader": {
+        "type": "ImageNetDataLoader",
+        "args":{
+            "data_dir": "../datasets/ImageNet",
+            "batch_size": 256,
+            "shuffle": true,
+            "validation_split": 0.1,
+            "num_workers": 4
+        }
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "loss": {
+        "type": "CrossEntropyLoss",
+        "args": {
+
+        }
+    }
+}

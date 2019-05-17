@@ -1,11 +1,15 @@
 import os
+import json
+from copy import copy
+
 import logging
 from pathlib import Path
 from functools import reduce
 from operator import getitem
 from datetime import datetime
 from logger import setup_logging
-from utils import read_json, write_json
+from utils import write_json
+from utils.logging_config import logger
 
 
 class ConfigParser:
@@ -22,13 +26,14 @@ class ConfigParser:
             self.cfg_fname = self.resume.parent / 'config.json'
         else:
             msg_no_cfg = "Configuration file need to be specified. Add '-c config.json', for example."
-            assert args.config is not None, msg_no_cfg
+            assert args.configs is not None, msg_no_cfg
             self.resume = None
-            self.cfg_fname = Path(args.config)
+            # self.cfg_fname = Path(args.config)
 
+        self.__config = {}
         # load config file and apply custom cli options
-        config = read_json(self.cfg_fname)
-        self.__config = _update_config(config, options, args)
+        for config_file in args.configs:
+            self.__config = extend_config(self.__config, json.load(open(config_file)))
 
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config['trainer']['save_dir'])
@@ -64,7 +69,8 @@ class ConfigParser:
         return self.config[name]
 
     def get_logger(self, name, verbosity=2):
-        msg_verbosity = 'verbosity option {} is invalid. Valid options are {}.'.format(verbosity, self.log_levels.keys())
+        msg_verbosity = 'verbosity option {} is invalid. Valid options are {}.'.format(
+            verbosity, self.log_levels.keys())
         assert verbosity in self.log_levels, msg_verbosity
         logger = logging.getLogger(name)
         logger.setLevel(self.log_levels[verbosity])
@@ -83,6 +89,7 @@ class ConfigParser:
     def log_dir(self):
         return self.__log_dir
 
+
 # helper functions used to update config dict with custom cli options
 def _update_config(config, options, args):
     for opt in options:
@@ -91,16 +98,32 @@ def _update_config(config, options, args):
             _set_by_path(config, opt.target, value)
     return config
 
+
 def _get_opt_name(flags):
     for flg in flags:
         if flg.startswith('--'):
             return flg.replace('--', '')
     return flags[0].replace('--', '')
 
+
 def _set_by_path(tree, keys, value):
     """Set a value in a nested object in tree by sequence of keys."""
     _get_by_path(tree, keys[:-1])[keys[-1]] = value
 
+
 def _get_by_path(tree, keys):
     """Access a nested object in tree by sequence of keys."""
     return reduce(getitem, keys, tree)
+
+
+def extend_config(config, config_B):
+    new_config = copy(config)
+    for key, value in config_B.items():
+        if key in new_config.keys():
+            if key == 'name':
+                value = f"{new_config[key]}_{value}"
+            else:
+                logger.warning(f"Overriding '{key}' in config")
+            del new_config[key]
+        new_config[key] = value
+    return new_config

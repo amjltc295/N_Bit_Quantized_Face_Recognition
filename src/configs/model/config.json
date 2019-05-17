@@ -1,0 +1,8 @@
+{
+    "arch": {
+        "type": "MobileNetV2",
+        "args": {
+            "n_class": 5749
+        }
+    }
+}
