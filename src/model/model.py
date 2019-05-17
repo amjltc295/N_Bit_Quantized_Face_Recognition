@@ -1,6 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
+
 from base import BaseModel
+from model.mobilenetv2 import MobileNetV2
 
 
 class MnistModel(BaseModel):
@@ -20,3 +22,11 @@ class MnistModel(BaseModel):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+
+class MobileNetV2Model(BaseModel):
+    def __init__(self, n_class=1000, input_size=112, width_mult=1.):
+        self.model = MobileNetV2(n_class, input_size, width_mult)
+
+    def forward(self, x):
+        return self.model(x)
