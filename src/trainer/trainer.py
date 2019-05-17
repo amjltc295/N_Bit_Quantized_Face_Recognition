@@ -52,7 +52,7 @@ class Trainer(BaseTrainer):
             data, target = data.to(self.device), target.to(self.device)
 
             self.optimizer.zero_grad()
-            output = self.model(data)
+            output = self.model(data, target)
             loss = self.loss(output, target)
             loss.backward()
             self.optimizer.step()
@@ -101,7 +101,7 @@ class Trainer(BaseTrainer):
             for batch_idx, (data, target) in enumerate(self.valid_data_loader):
                 data, target = data.to(self.device), target.to(self.device)
 
-                output = self.model(data)
+                output = self.model(data, target)
                 loss = self.loss(output, target)
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
