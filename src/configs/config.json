@@ -9,10 +9,10 @@
         }
     },
     "data_loader": {
-        "type": "LFWDataLoader",
+        "type": "FaceDataLoader",
         "args":{
             "data_dir": "../datasets/lfw-deepfunneled",
-            "batch_size": 64,
+            "batch_size": 256,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 2
@@ -21,7 +21,7 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.001,
+            "lr": 0.0001,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -33,7 +33,7 @@
         }
     },
     "metrics": [
-        "my_metric", "my_metric2"
+        "accuracy", "topK_accuracy"
     ],
     "lr_scheduler": {
         "type": "StepLR",
