@@ -1,0 +1,11 @@
+{
+    "arch": {
+        "type": "FaceRecognitionModel",
+        "args": {
+            "backbone": "MobileNetV2",
+            "head": "Softmax",
+            "n_class": 5749,
+            "input_size": 32
+        }
+    }
+}
