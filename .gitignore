@@ -115,3 +115,9 @@ dmypy.json
 
 # outputs
 **outputs*
+
+# Models
+**saved
+
+## Data
+datasets/
