@@ -4,10 +4,14 @@ import model.head as heads
 
 
 class FaceRecognitionModel(BaseModel):
-    def __init__(self, backbone, head, n_class=1000, embedding_size=512, input_size=112, device_id=[0], **kwargs):
+    def __init__(
+        self, backbone, head,
+        n_class=1000, embedding_size=512, input_size=[112, 112],
+        channel_size=32, device_id=[0], **kwargs
+    ):
         super().__init__()
         if backbone in ['MobileNetV2']:
-            self.backbone = getattr(backbones, backbone)(embedding_size, input_size)
+            self.backbone = getattr(backbones, backbone)(embedding_size, channel_size)
         else:
             self.backbone = getattr(backbones, backbone)(input_size)
         self.head = getattr(heads, head)(in_features=embedding_size, out_features=n_class, device_id=device_id)

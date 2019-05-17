@@ -20,7 +20,7 @@ class LFWDataLoader(BaseDataLoader):
     """
     LFW data loader
     """
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=4, training=True):
+    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=4, training=True, **kwargs):
         if training:
             self.transform = transforms.Compose([
                 transforms.Resize((112, 112)),

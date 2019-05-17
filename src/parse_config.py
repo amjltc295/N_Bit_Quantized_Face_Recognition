@@ -1,13 +1,11 @@
 import os
 import json
 from copy import copy
-
-import logging
 from pathlib import Path
 from functools import reduce
 from operator import getitem
 from datetime import datetime
-from logger import setup_logging
+
 from utils import write_json
 from utils.logging_config import logger
 
@@ -30,6 +28,7 @@ class ConfigParser:
             self.resume = None
             # self.cfg_fname = Path(args.config)
 
+        self.args = args
         self.__config = {}
         # load config file and apply custom cli options
         for config_file in args.configs:
@@ -49,14 +48,6 @@ class ConfigParser:
         # save updated config file to the checkpoint dir
         write_json(self.config, self.save_dir / 'config.json')
 
-        # configure logging module
-        setup_logging(self.log_dir)
-        self.log_levels = {
-            0: logging.WARNING,
-            1: logging.INFO,
-            2: logging.DEBUG
-        }
-
     def initialize(self, name, module, *args):
         """
         finds a function handle with the name given as 'type' in config, and returns the
@@ -67,14 +58,6 @@ class ConfigParser:
 
     def __getitem__(self, name):
         return self.config[name]
-
-    def get_logger(self, name, verbosity=2):
-        msg_verbosity = 'verbosity option {} is invalid. Valid options are {}.'.format(
-            verbosity, self.log_levels.keys())
-        assert verbosity in self.log_levels, msg_verbosity
-        logger = logging.getLogger(name)
-        logger.setLevel(self.log_levels[verbosity])
-        return logger
 
     # setting read-only attributes
     @property

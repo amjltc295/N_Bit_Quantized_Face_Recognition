@@ -16,6 +16,7 @@ def main(config):
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console
+    config['arch']['args']['n_class'] = config['data_loader']['args']['n_class']
     model = config.initialize('arch', module_arch)
     logger.info(model)
 
@@ -33,7 +34,8 @@ def main(config):
                       config=config,
                       data_loader=data_loader,
                       valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler)
+                      lr_scheduler=lr_scheduler,
+                      pretrained_path=config.args.pretrained_path)
 
     trainer.train()
 
@@ -47,6 +49,8 @@ if __name__ == '__main__':
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')
+    args.add_argument('-p', '--pretrained_path', default=None, type=str,
+                      help='pretrained model path (default: None)')
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')

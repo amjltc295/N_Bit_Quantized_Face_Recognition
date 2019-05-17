@@ -28,8 +28,10 @@
         "verbosity": 2,
         
         "monitor": "min val_loss",
-        "early_stop": 10,
+        "early_stop": 20,
         
-        "tensorboardX": true
+        "tensorboardX": true,
+        "pretrained_load_strict": true,
+        "load_backbone": true
     }
 }
