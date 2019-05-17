@@ -3,14 +3,16 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "MnistModel",
-        "args": {}
+        "type": "MobileNetV2",
+        "args": {
+            "n_class": 5749
+        }
     },
     "data_loader": {
         "type": "LFWDataLoader",
         "args":{
             "data_dir": "../datasets/lfw-deepfunneled",
-            "batch_size": 16,
+            "batch_size": 64,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 2
@@ -24,7 +26,12 @@
             "amsgrad": true
         }
     },
-    "loss": "nll_loss",
+    "loss": {
+        "type": "CrossEntropyLoss",
+        "args": {
+
+        }
+    },
     "metrics": [
         "my_metric", "my_metric2"
     ],
