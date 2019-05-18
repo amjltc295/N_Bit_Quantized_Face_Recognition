@@ -121,3 +121,5 @@ dmypy.json
 
 ## Data
 datasets/
+pretrained_weights
+libs

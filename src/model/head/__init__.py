@@ -29,7 +29,7 @@ class Softmax(nn.Module):
         nn.init.xavier_uniform_(self.weight)
         nn.init.zeros_(self.bias)
 
-    def forward(self, x):
+    def forward(self, x, label):
         if self.device_id == None:
             out = F.linear(x, self.weight, self.bias)
         else:

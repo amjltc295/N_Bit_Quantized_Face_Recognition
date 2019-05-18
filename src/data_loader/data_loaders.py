@@ -6,6 +6,7 @@ class MnistDataLoader(BaseDataLoader):
     """
     MNIST data loading demo using BaseDataLoader
     """
+
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
         trsfm = transforms.Compose([
             transforms.ToTensor(),
@@ -20,7 +21,16 @@ class LFWDataLoader(BaseDataLoader):
     """
     LFW data loader
     """
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=4, training=True):
+
+    def __init__(
+            self,
+            data_dir,
+            batch_size,
+            shuffle=True,
+            validation_split=0.0,
+            num_workers=4,
+            training=True,
+            **kwargs):
         if training:
             self.transform = transforms.Compose([
                 transforms.Resize((112, 112)),

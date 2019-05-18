@@ -13,9 +13,7 @@ install:
   # - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-
-  - conda env create -f environment.yaml
-  - source activate n_bit_quantized_face_recognition
+  - conda install flake8
 
 script:
   - flake8 .

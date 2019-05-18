@@ -3,9 +3,9 @@
     "arch": {
         "type": "FaceRecognitionModel",
         "args": {
-            "backbone": "IR_50",
+            "backbone": "MobileNetV2",
             "head": "Softmax",
-            "input_size": [112, 112]
+            "channel_size": 32
         }
     }
 }

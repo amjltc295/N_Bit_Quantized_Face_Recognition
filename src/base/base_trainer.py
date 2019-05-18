@@ -2,15 +2,19 @@ import torch
 from abc import abstractmethod
 from numpy import inf
 from logger import WriterTensorboardX
+from utils.logging_config import logger
 
 
 class BaseTrainer:
     """
     Base class for all trainers
     """
-    def __init__(self, model, loss, metrics, optimizer, config):
+    def __init__(
+        self, model, loss, metrics, optimizer, config,
+        pretrained_path=None,
+    ):
         self.config = config
-        self.logger = config.get_logger('trainer', config['trainer']['verbosity'])
+        self.logger = logger
 
         # setup GPU device if available, move model into configured device
         self.device, device_ids = self._prepare_device(config['n_gpu'])
@@ -44,8 +48,12 @@ class BaseTrainer:
         # setup visualization writer instance
         self.writer = WriterTensorboardX(config.log_dir, self.logger, cfg_trainer['tensorboardX'])
 
+        self.pretrained_load_strict = config['trainer']['pretrained_load_strict']
+
         if config.resume is not None:
             self._resume_checkpoint(config.resume)
+        elif pretrained_path is not None:
+            self._load_pretrained(pretrained_path)
 
     @abstractmethod
     def _train_epoch(self, epoch):
@@ -174,3 +182,51 @@ class BaseTrainer:
             self.optimizer.load_state_dict(checkpoint['optimizer'])
 
         self.logger.info("Checkpoint loaded. Resume training from epoch {}".format(self.start_epoch))
+
+    def _load_pretrained(self, pretrained_path):
+        self.logger.info(f"Loading pretrained checkpoint from {pretrained_path}")
+        checkpoint = torch.load(pretrained_path)
+
+        # For face.evoLVe.PyTorch models
+        if self.config['trainer'].get('load_backbone', False):
+            self.model.backbone.load_state_dict(checkpoint)
+            for param in self.model.backbone.parameters():
+                param.requires_grad = False
+                self.logger.info(f"freeze {param}")
+            return
+
+        pretrained_state = checkpoint['state_dict']
+        if self.pretrained_load_strict:
+            self.model.load_state_dict(pretrained_state)
+        else:
+            current_state = self.model.state_dict()
+            lack_modules = set([
+                k.split('.')[0]
+                for k in current_state.keys()
+                if k not in pretrained_state.keys()
+            ])
+            self.logger.info(f"Allowing lack of submodules for pretrained model.")
+            self.logger.info(f"Submodule(s) not in pretrained model but in current model: {lack_modules}")
+            redundant_modules = set([
+                k.split('.')[0]
+                for k in pretrained_state.keys()
+                if k not in current_state.keys()
+            ])
+            self.logger.info(f"Submodule(s) not in current model but in pretraired model: {set(redundant_modules)}")
+
+            # used_pretrained_state = {k: v for k, v in pretrained_state.items() if k in current_state}
+            used_pretrained_state = {}
+            prefixs = []
+            for k, v in pretrained_state.items():
+                if k in current_state:
+                    used_pretrained_state[k] = v
+                else:
+                    # Backward compatible
+                    for prefix in prefixs:
+                        new_key = prefix + k
+                        if new_key in current_state:
+                            self.logger.warning(f"Load key to new model: {k} -> {new_key}")
+                            used_pretrained_state[new_key] = v
+            current_state.update(used_pretrained_state)
+            self.model.load_state_dict(current_state)
+        self.logger.info("Pretrained checkpoint loaded")

@@ -1,12 +1,14 @@
 {
+    "name": "LFW-aligned_b128",
     "data_loader": {
         "type": "LFWDataLoader",
         "args":{
             "data_dir": "../datasets/lfw-deepfunneled/",
-            "batch_size": 256,
+            "batch_size": 128,
+            "n_class": 5749,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 4
+            "num_workers": 12
         }
     }
 }
