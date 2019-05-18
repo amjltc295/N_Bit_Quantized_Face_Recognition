@@ -1,0 +1,11 @@
+{
+    "name": "IR_50",
+    "arch": {
+        "type": "FaceRecognitionModel",
+        "args": {
+            "backbone": "MobileNetV2",
+            "head": "Softmax",
+            "channel_size": 32
+        }
+    }
+}
