@@ -5,7 +5,6 @@ taken and adapted from https://github.com/pytorch/pytorch/blob/master/torch/nn/u
 """
 import torch
 from torch.nn.parameter import Parameter
-from torch.autograd import Variable, Function
 import torch.nn as nn
 
 
@@ -20,15 +19,16 @@ def gather_params(self, memo=None, param_func=lambda s: s._parameters.values()):
         for p in gather_params(m, memo, param_func):
             yield p
 
+
 nn.Module.gather_params = gather_params
 
 
 def _norm(x, dim, p=2):
     """Computes the norm over all dimensions except dim"""
     if p == float('inf'):  # infinity norm
-        func = lambda x, dim: x.abs().max(dim=dim)[0]
+        def func(x, dim): return x.abs().max(dim=dim)[0]
     else:
-        func = lambda x, dim: torch.norm(x, dim=dim, p=p)
+        def func(x, dim): return torch.norm(x, dim=dim, p=p)
     if dim is None:
         return x.norm(p=p)
     elif dim == 0:

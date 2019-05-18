@@ -1,11 +1,8 @@
-import torch
+# From https://github.com/eladhoffer/quantized.pytorch/blob/master/models/mobilenet_quantized.py
 import torch.nn as nn
-from torch.nn.modules.utils import _single, _pair, _triple
 import math
-import torch.nn.functional as F
-from torch.nn.modules.utils import _pair
 import torchvision.transforms as transforms
-from .modules.quantize import quantize, quantize_grad, QConv2d, QLinear, RangeBN
+from .modules.quantize import QConv2d, QLinear, RangeBN
 __all__ = ['mobilenet_quantized']
 
 NUM_BITS = 8
@@ -37,7 +34,8 @@ class DepthwiseSeparableFusedConv2d(nn.Module):
         super(DepthwiseSeparableFusedConv2d, self).__init__()
         self.components = nn.Sequential(
             QConv2d(in_channels, in_channels, kernel_size,
-                    stride=stride, padding=padding, groups=in_channels, num_bits=NUM_BITS, num_bits_weight=NUM_BITS_WEIGHT, num_bits_grad=NUM_BITS_GRAD, biprecision=BIPRECISION),
+                    stride=stride, padding=padding, groups=in_channels, num_bits=NUM_BITS,
+                    num_bits_weight=NUM_BITS_WEIGHT, num_bits_grad=NUM_BITS_GRAD, biprecision=BIPRECISION),
             RangeBN(in_channels, num_bits=NUM_BITS,
                     num_bits_grad=NUM_BITS_GRAD),
             nn.ReLU(),
@@ -117,8 +115,10 @@ class MobileNet(nn.Module):
         ]
         self.features = nn.Sequential(*layers)
         self.avg_pool = nn.AvgPool2d(7)
-        self.fc = QLinear(nearby_int(width * 1024), num_classes, num_bits=NUM_BITS,
-                          num_bits_weight=NUM_BITS_WEIGHT, num_bits_grad=NUM_BITS_GRAD, biprecision=BIPRECISION)
+        # Not used as a backbone
+        if False:
+            self.fc = QLinear(nearby_int(width * 1024), num_classes, num_bits=NUM_BITS,
+                              num_bits_weight=NUM_BITS_WEIGHT, num_bits_grad=NUM_BITS_GRAD, biprecision=BIPRECISION)
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
         self.input_transform = {
@@ -156,7 +156,7 @@ class MobileNet(nn.Module):
         x = self.features(x)
         x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
-        x = self.fc(x)
+        # x = self.fc(x)
         return x
 
 

@@ -89,7 +89,7 @@ class RnLU(nn.Module):
     def forward(self, x):
         return rnlu(x, inplace=self.inplace)
 
-    # output.
+
 if __name__ == "__main__":
     x = Variable(torch.randn(2, 16, 5, 5).cuda(), requires_grad=True)
     output = rnlu(x)

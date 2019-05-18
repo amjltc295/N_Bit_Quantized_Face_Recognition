@@ -1,5 +1,5 @@
 import torch
-from torch.autograd.function import InplaceFunction, Function
+from torch.autograd.function import InplaceFunction
 import torch.nn as nn
 import torch.nn.functional as F
 import math
@@ -32,9 +32,9 @@ class UniformQuantize(InplaceFunction):
             y = input.view(B // num_chunks, -1)
         if min_value is None:
             min_value = y.min(-1)[0].mean(-1)  # C
-            #min_value = float(input.view(input.size(0), -1).min(-1)[0].mean())
+            # min_value = float(input.view(input.size(0), -1).min(-1)[0].mean())
         if max_value is None:
-            #max_value = float(input.view(input.size(0), -1).max(-1)[0].mean())
+            # max_value = float(input.view(input.size(0), -1).max(-1)[0].mean())
             max_value = y.max(-1)[0].mean(-1)  # C
         ctx.inplace = inplace
         ctx.num_bits = num_bits
@@ -50,7 +50,7 @@ class UniformQuantize(InplaceFunction):
 
         qmin = 0.
         qmax = 2.**num_bits - 1.
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         scale = (max_value - min_value) / (qmax - qmin)
 
         scale = max(scale, 1e-8)
@@ -174,8 +174,20 @@ class QuantMeasure(nn.Module):
 class QConv2d(nn.Conv2d):
     """docstring for QConv2d."""
 
-    def __init__(self, in_channels, out_channels, kernel_size,
-                 stride=1, padding=0, dilation=1, groups=1, bias=True, num_bits=8, num_bits_weight=None, num_bits_grad=None, biprecision=False):
+    def __init__(
+            self,
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=1,
+            padding=0,
+            dilation=1,
+            groups=1,
+            bias=True,
+            num_bits=8,
+            num_bits_weight=None,
+            num_bits_grad=None,
+            biprecision=False):
         super(QConv2d, self).__init__(in_channels, out_channels, kernel_size,
                                       stride, padding, dilation, groups, bias)
         self.num_bits = num_bits
@@ -208,7 +220,15 @@ class QConv2d(nn.Conv2d):
 class QLinear(nn.Linear):
     """docstring for QConv2d."""
 
-    def __init__(self, in_features, out_features, bias=True, num_bits=8, num_bits_weight=None, num_bits_grad=None, biprecision=False):
+    def __init__(
+            self,
+            in_features,
+            out_features,
+            bias=True,
+            num_bits=8,
+            num_bits_weight=None,
+            num_bits_grad=None,
+            biprecision=False):
         super(QLinear, self).__init__(in_features, out_features, bias)
         self.num_bits = num_bits
         self.num_bits_weight = num_bits_weight or num_bits
@@ -238,7 +258,16 @@ class QLinear(nn.Linear):
 class RangeBN(nn.Module):
     # this is normalized RangeBN
 
-    def __init__(self, num_features, dim=1, momentum=0.1, affine=True, num_chunks=16, eps=1e-5, num_bits=8, num_bits_grad=8):
+    def __init__(
+            self,
+            num_features,
+            dim=1,
+            momentum=0.1,
+            affine=True,
+            num_chunks=16,
+            eps=1e-5,
+            num_bits=8,
+            num_bits_grad=8):
         super(RangeBN, self).__init__()
         self.register_buffer('running_mean', torch.zeros(num_features))
         self.register_buffer('running_var', torch.zeros(num_features))
