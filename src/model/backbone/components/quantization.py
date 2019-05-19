@@ -128,6 +128,28 @@ class QConv2d(nn.Conv2d):
         return output
 
 
+class QLinear(nn.Linear):
+    """ Quantized fully connected layer """
+
+    def __init__(self, in_features, out_features, bias=True, num_bits=8, num_bits_bias=32):
+        super(QLinear, self).__init__(in_features, out_features, bias)
+        self.num_bits = num_bits
+        self.num_bits_bias = num_bits_bias
+        self.quantize_input = QuantMeasure(self.num_bits)
+
+    def forward(self, input):
+        qinput = self.quantize_input(input)
+        weight_qparams = calculate_qparams(self.weight, num_bits=self.num_bits)
+        qweight = quantize(self.weight, qparams=weight_qparams)
+
+        if self.bias is not None:
+            qbias = quantize(self.bias, num_bits=self.num_bits_bias)
+        else:
+            qbias = None
+        output = F.linear(qinput, qweight, qbias)
+        return output
+
+
 class QBatchNorm2d(nn.BatchNorm2d):
     def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True,
                  track_running_stats=True, num_bits=8, num_bits_bias=32):
