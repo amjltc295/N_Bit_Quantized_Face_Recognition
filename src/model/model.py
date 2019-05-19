@@ -6,12 +6,12 @@ import model.head as heads
 class FaceRecognitionModel(BaseModel):
     def __init__(
         self, backbone, head,
-        n_class=1000, embedding_size=512, input_size=[112, 112],
-        channel_size=32, device_id=[0], **kwargs
+        n_class, embedding_size=512, input_size=[112, 112],
+        input_channel=32, device_id=[0], **kwargs
     ):
         super().__init__()
-        if backbone in ['MobileNetV2', 'QuantizedMobileV2']:
-            self.backbone = getattr(backbones, backbone)(embedding_size, channel_size)
+        if backbone in ['MobileNetV2', 'QuantizedMobileNetV2']:
+            self.backbone = getattr(backbones, backbone)(n_class=embedding_size, input_channel=input_channel)
         elif backbone in ['QuantizedMobileNet']:
             self.backbone = getattr(backbones, backbone)(**kwargs)
         else:
