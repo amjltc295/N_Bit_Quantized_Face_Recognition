@@ -61,11 +61,9 @@ class InvertedResidual(nn.Module):
 
 
 class MobileNetV2(nn.Module):
-    def __init__(self, n_class=1000, input_size=224, width_mult=1.):
+    def __init__(self, n_class=1000, input_size=224, width_mult=1., input_channel=32, last_channel=512):
         super(MobileNetV2, self).__init__()
         block = InvertedResidual
-        input_channel = 32
-        last_channel = 1280
         interverted_residual_setting = [
             # t, c, n, s
             [1, 16, 1, 1],
@@ -97,17 +95,18 @@ class MobileNetV2(nn.Module):
         self.features = nn.Sequential(*self.features)
 
         # building classifier
-        self.classifier = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.Linear(self.last_channel, n_class),
-        )
+        # self.classifier = nn.Sequential(
+        #     nn.Dropout(0.2),
+        #     nn.Linear(self.last_channel, n_class),
+        # )
 
         self._initialize_weights()
 
     def forward(self, x):
         x = self.features(x)
         x = x.mean(3).mean(2)
-        x = self.classifier(x)
+        # No classifier as a backbone
+        # x = self.classifier(x)
         return x
 
     def _initialize_weights(self):
