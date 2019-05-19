@@ -1,11 +1,11 @@
 {
-    "name": "MobileNetV2",
+    "name": "QuantizedMobileNet",
     "arch": {
         "type": "FaceRecognitionModel",
         "args": {
-            "backbone": "MobileNetV2",
+            "backbone": "QuantizedMobileNet",
             "head": "Softmax",
-            "channel_size": 32
+            "width": 0.5
         }
     }
 }
