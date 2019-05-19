@@ -2,7 +2,6 @@ import torch
 from abc import abstractmethod
 from numpy import inf
 from logger import WriterTensorboardX
-from utils.logging_config import logger
 
 
 class BaseTrainer:
@@ -14,7 +13,7 @@ class BaseTrainer:
         pretrained_path=None,
     ):
         self.config = config
-        self.logger = logger
+        self.logger = config.get_logger('trainer', config['trainer']['verbosity'])
 
         # setup GPU device if available, move model into configured device
         self.device, device_ids = self._prepare_device(config['n_gpu'])

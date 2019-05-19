@@ -1,4 +1,5 @@
 import os
+import logging
 import json
 from copy import copy
 from pathlib import Path
@@ -7,7 +8,7 @@ from operator import getitem
 from datetime import datetime
 
 from utils import write_json
-from utils.logging_config import logger
+from logger import setup_logging
 
 
 class ConfigParser:
@@ -32,7 +33,7 @@ class ConfigParser:
         self.__config = {}
         # load config file and apply custom cli options
         for config_file in args.configs:
-            self.__config = extend_config(self.__config, json.load(open(config_file)))
+            self.__config = self.extend_config(self.__config, json.load(open(config_file)))
 
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config['trainer']['save_dir'])
@@ -48,6 +49,13 @@ class ConfigParser:
         # save updated config file to the checkpoint dir
         write_json(self.config, self.save_dir / 'config.json')
 
+        setup_logging(self.log_dir)
+        self.log_levels = {
+            0: logging.WARNING,
+            1: logging.INFO,
+            2: logging.DEBUG
+        }
+
     def initialize(self, name, module, *args):
         """
         finds a function handle with the name given as 'type' in config, and returns the
@@ -58,6 +66,14 @@ class ConfigParser:
 
     def __getitem__(self, name):
         return self.config[name]
+
+    def get_logger(self, name, verbosity=2):
+        msg_verbosity = 'verbosity option {} is invalid. Valid options are {}.'.format(
+            verbosity, self.log_levels.keys())
+        assert verbosity in self.log_levels, msg_verbosity
+        logger = logging.getLogger(name)
+        logger.setLevel(self.log_levels[verbosity])
+        return logger
 
     # setting read-only attributes
     @property
@@ -71,6 +87,18 @@ class ConfigParser:
     @property
     def log_dir(self):
         return self.__log_dir
+
+    def extend_config(self, config, config_B):
+        new_config = copy(config)
+        for key, value in config_B.items():
+            if key in new_config.keys():
+                if key == 'name':
+                    value = f"{new_config[key]}_{value}"
+                else:
+                    self.get_logger('logger').warning(f"Overriding '{key}' in config")
+                del new_config[key]
+            new_config[key] = value
+        return new_config
 
 
 # helper functions used to update config dict with custom cli options
@@ -97,16 +125,3 @@ def _set_by_path(tree, keys, value):
 def _get_by_path(tree, keys):
     """Access a nested object in tree by sequence of keys."""
     return reduce(getitem, keys, tree)
-
-
-def extend_config(config, config_B):
-    new_config = copy(config)
-    for key, value in config_B.items():
-        if key in new_config.keys():
-            if key == 'name':
-                value = f"{new_config[key]}_{value}"
-            else:
-                logger.warning(f"Overriding '{key}' in config")
-            del new_config[key]
-        new_config[key] = value
-    return new_config
