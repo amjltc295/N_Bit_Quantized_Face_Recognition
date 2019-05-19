@@ -1,11 +1,11 @@
 {
-    "name": "MobileNetV2NoFC_ArcFace",
+    "name": "MobileNetV2withFC_ArcFace",
     "arch": {
         "type": "FaceRecognitionModel",
         "args": {
             "backbone": "MobileNetV2",
             "head": "ArcFace",
-            "channel_size": 32
+            "input_channel": 32
         }
     }
 }
