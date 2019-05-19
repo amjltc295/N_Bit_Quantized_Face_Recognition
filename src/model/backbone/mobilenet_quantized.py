@@ -110,7 +110,7 @@ class MobileNet(nn.Module):
             # Paper specifies stride-2, but unchanged size.
             # Assume its a typo and use stride-1 convolution
             DepthwiseSeparableFusedConv2d(
-                nearby_int(width * 1024), nearby_int(width * 1024),
+                nearby_int(width * 1024), nearby_int(width * 512),  # Make it the same as IR50
                 kernel_size=3, stride=1, padding=1)
         ]
         self.features = nn.Sequential(*layers)
