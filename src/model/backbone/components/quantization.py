@@ -209,5 +209,5 @@ class QReLU6(nn.Module):
             out = x.clamp_(0, 2 ** self.num_bits)
         else:
             out = torch.clamps(x, 0, 2 ** self.num_bits)
-        qout = quantize(out, self.num_bits)
+        qout = quantize(out, num_bits=self.num_bits)
         return qout
