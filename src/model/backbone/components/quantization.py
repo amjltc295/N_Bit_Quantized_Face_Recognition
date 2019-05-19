@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd.function import InplaceFunction
+from torch._jit_internal import weak_script_method
 
 QParams = namedtuple('QParams', ['s', 'z', 'num_bits', 'a', 'b'])
 
@@ -14,7 +15,7 @@ def calculate_qparams(x, num_bits):
         b = x.max().item()
 
         level = 2 ** num_bits - 1
-        s = (b - a) / level
+        s = max((b - a) / level, 1e-8)
         z = round((0.0 - a) / s)
         return QParams(a=a, b=b, s=s, z=z, num_bits=num_bits)
 
@@ -105,7 +106,7 @@ class QConv2d(nn.Conv2d):
                                       stride, padding, dilation, groups, bias)
         self.num_bits = num_bits
         self.num_bits_bias = num_bits_bias
-        self.quantize_input = QuantMeasure(self.num_bits, shape_measure=(1, 1, 1, 1))
+        self.quantize_input = QuantMeasure(self.num_bits)
 
     def forward(self, input):
         qinput = self.quantize_input(input)
@@ -119,3 +120,61 @@ class QConv2d(nn.Conv2d):
         output = F.conv2d(qinput, qweight, qbias, self.stride,
                           self.padding, self.dilation, self.groups)
         return output
+
+
+class QBatchNorm2d(nn.BatchNorm2d):
+    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True,
+                 track_running_stats=True, num_bits=8, num_bits_bias=32):
+        super(QBatchNorm2d, self).__init__(
+            num_features, eps=1e-5, momentum=0.1, affine=True,
+            track_running_stats=True)
+        self.num_bits = num_bits
+        self.num_bits_bias = num_bits_bias
+        self.quantize_input = QuantMeasure(self.num_bits)
+
+    @weak_script_method
+    def forward(self, input):
+        self._check_input_dim(input)
+
+        # exponential_average_factor is self.momentum set to
+        # (when it is available) only so that if gets updated
+        # in ONNX graph when this node is exported to ONNX.
+        if self.momentum is None:
+            exponential_average_factor = 0.0
+        else:
+            exponential_average_factor = self.momentum
+
+        if self.training and self.track_running_stats:
+            # TODO: if statement only here to tell the jit to skip emitting this when it is None
+            if self.num_batches_tracked is not None:
+                self.num_batches_tracked += 1
+                if self.momentum is None:  # use cumulative moving average
+                    exponential_average_factor = 1.0 / float(self.num_batches_tracked)
+                else:  # use exponential moving average
+                    exponential_average_factor = self.momentum
+
+        qinput = self.quantize_input(input)
+        weight_qparams = calculate_qparams(self.weight, num_bits=self.num_bits)
+        qweight = quantize(self.weight, qparams=weight_qparams)
+
+        if self.bias is not None:
+            qbias = quantize(self.bias, num_bits=self.num_bits_bias)
+        else:
+            qbias = None
+        return F.batch_norm(
+            qinput, self.running_mean, self.running_var, qweight, qbias,
+            self.training or not self.track_running_stats,
+            exponential_average_factor, self.eps)
+
+
+class QReLU6(nn.Module):
+    def __init__(self, num_bits=8, inplace=True):
+        super().__init__()
+        self.num_bits = num_bits
+        self.inplace = inplace
+
+    def forward(self, x):
+        if self.inplace:
+            return x.clamp(0, 2 ** self.num_bits)
+        else:
+            return torch.clamps(x, 0, 2 ** self.num_bits)

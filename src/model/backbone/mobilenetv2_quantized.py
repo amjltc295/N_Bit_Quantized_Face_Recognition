@@ -2,7 +2,7 @@
 import torch.nn as nn
 import math
 
-from quantization import QConv2d, QBatchNorm2d, QReLU6
+from .components.quantization import QConv2d, QBatchNorm2d, QReLU6
 
 
 def conv_bn(inp, oup, stride):
@@ -62,9 +62,9 @@ class InvertedResidual(nn.Module):
             return self.conv(x)
 
 
-class MobileNetV2(nn.Module):
+class QuantizedMobileNetV2(nn.Module):
     def __init__(self, n_class=1000, input_size=224, width_mult=1., input_channel=32, last_channel=512):
-        super(MobileNetV2, self).__init__()
+        super(QuantizedMobileNetV2, self).__init__()
         block = InvertedResidual
         interverted_residual_setting = [
             # t, c, n, s
