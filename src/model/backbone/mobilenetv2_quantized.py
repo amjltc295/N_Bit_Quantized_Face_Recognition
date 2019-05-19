@@ -2,7 +2,7 @@
 import torch.nn as nn
 import math
 
-from .components.quantization import QConv2d, QBatchNorm2d, QReLU6
+from .components.quantization import QConv2d, QBatchNorm2d, QReLU6, QLinear
 
 
 def conv_bn(inp, oup, stride):
@@ -63,7 +63,7 @@ class InvertedResidual(nn.Module):
 
 
 class QuantizedMobileNetV2(nn.Module):
-    def __init__(self, n_class=1000, input_size=224, width_mult=1., input_channel=32, last_channel=512):
+    def __init__(self, n_class=512, input_size=224, width_mult=1., input_channel=32, last_channel=1024):
         super(QuantizedMobileNetV2, self).__init__()
         block = InvertedResidual
         interverted_residual_setting = [
@@ -97,10 +97,10 @@ class QuantizedMobileNetV2(nn.Module):
         self.features = nn.Sequential(*self.features)
 
         # building classifier
-        # self.classifier = nn.Sequential(
-        #     nn.Dropout(0.2),
-        #     nn.Linear(self.last_channel, n_class),
-        # )
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.2),
+            QLinear(self.last_channel, n_class),
+        )
 
         self._initialize_weights()
 
@@ -108,7 +108,7 @@ class QuantizedMobileNetV2(nn.Module):
         x = self.features(x)
         x = x.mean(3).mean(2)
         # No classifier as a backbone
-        # x = self.classifier(x)
+        x = self.classifier(x)
         return x
 
     def _initialize_weights(self):
@@ -121,7 +121,7 @@ class QuantizedMobileNetV2(nn.Module):
             elif isinstance(m, QBatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-            elif isinstance(m, nn.Linear):
+            elif isinstance(m, QLinear):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
