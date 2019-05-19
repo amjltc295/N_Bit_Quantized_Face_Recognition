@@ -12,6 +12,8 @@ class FaceRecognitionModel(BaseModel):
         super().__init__()
         if backbone in ['MobileNetV2']:
             self.backbone = getattr(backbones, backbone)(embedding_size, channel_size)
+        elif backbone in ['QuantizedMobileNet']:
+            self.backbone = getattr(backbones, backbone)(**kwargs)
         else:
             self.backbone = getattr(backbones, backbone)(input_size)
         self.head = getattr(heads, head)(in_features=embedding_size, out_features=n_class, device_id=device_id)
