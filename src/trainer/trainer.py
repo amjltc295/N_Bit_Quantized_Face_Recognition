@@ -49,6 +49,10 @@ class Trainer(BaseTrainer):
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
         for batch_idx, (data, target) in enumerate(self.data_loader):
+            # A dirty fix for the bug of RangeBN
+            if data.shape[0] != self.data_loader.batch_size:
+                continue
+
             data, target = data.to(self.device), target.to(self.device)
 
             self.optimizer.zero_grad()
