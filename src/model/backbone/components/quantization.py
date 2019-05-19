@@ -9,14 +9,19 @@ from torch._jit_internal import weak_script_method
 QParams = namedtuple('QParams', ['s', 'z', 'num_bits', 'a', 'b'])
 
 
+def calculate_s_and_z(a, b, num_bits):
+    level = 2 ** num_bits - 1
+    s = max((b - a) / level, 1e-8)
+    z = round((0.0 - a) / s)
+    return s, z
+
+
 def calculate_qparams(x, num_bits):
     with torch.no_grad():
         a = x.min().item()
         b = x.max().item()
+        s, z = calculate_s_and_z(a, b, num_bits)
 
-        level = 2 ** num_bits - 1
-        s = max((b - a) / level, 1e-8)
-        z = round((0.0 - a) / s)
         return QParams(a=a, b=b, s=s, z=z, num_bits=num_bits)
 
 
@@ -81,7 +86,8 @@ class QuantMeasure(nn.Module):
                 self.running_a.mul_(momentum).add_(qparams.a * (1 - momentum))
                 self.running_b.mul_(momentum).add_(qparams.b * (1 - momentum))
         else:
-            qparams = QParams(a=self.running_a, b=self.running_b, num_bits=self.num_bits)
+            s, z = calculate_s_and_z(self.running_a.item(), self.running_b.item(), self.num_bits)
+            qparams = QParams(a=self.running_a.item(), b=self.running_b.item(), num_bits=self.num_bits, s=s, z=z)
         q_input = quantize(input, qparams=qparams, inplace=self.inplace)
         return q_input
 
