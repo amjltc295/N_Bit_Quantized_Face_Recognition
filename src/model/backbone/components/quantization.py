@@ -206,7 +206,7 @@ class QReLU6(nn.Module):
 
     def forward(self, x):
         if self.inplace:
-            out = x.clamp(0, 2 ** self.num_bits)
+            out = x.clamp_(0, 2 ** self.num_bits)
         else:
             out = torch.clamps(x, 0, 2 ** self.num_bits)
         qout = quantize(out, self.num_bits)
