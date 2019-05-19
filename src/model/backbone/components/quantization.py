@@ -112,10 +112,11 @@ class QConv2d(nn.Conv2d):
                                       stride, padding, dilation, groups, bias)
         self.num_bits = num_bits
         self.num_bits_bias = num_bits_bias
-        self.quantizer = QuantMeasure(self.num_bits)
+        self.quantize_and_measure = QuantMeasure(self.num_bits)
 
     def forward(self, input):
-        qinput = self.quantizer(input)
+        # qinput = self.quantize_and_measure(input)
+        qinput = input
         weight_qparams = calculate_qparams(self.weight, num_bits=self.num_bits)
         qweight = quantize(self.weight, qparams=weight_qparams)
 
@@ -135,10 +136,11 @@ class QLinear(nn.Linear):
         super(QLinear, self).__init__(in_features, out_features, bias)
         self.num_bits = num_bits
         self.num_bits_bias = num_bits_bias
-        self.quantizer = QuantMeasure(self.num_bits)
+        self.quantize_and_measure = QuantMeasure(self.num_bits)
 
     def forward(self, input):
-        qinput = self.quantizer(input)
+        # qinput = self.quantize_and_measure(input)
+        qinput = input
         weight_qparams = calculate_qparams(self.weight, num_bits=self.num_bits)
         qweight = quantize(self.weight, qparams=weight_qparams)
 
@@ -158,7 +160,7 @@ class QBatchNorm2d(nn.BatchNorm2d):
             track_running_stats=True)
         self.num_bits = num_bits
         self.num_bits_bias = num_bits_bias
-        self.quantizer = QuantMeasure(self.num_bits)
+        self.quantize_and_measure = QuantMeasure(self.num_bits)
 
     @weak_script_method
     def forward(self, input):
@@ -181,7 +183,8 @@ class QBatchNorm2d(nn.BatchNorm2d):
                 else:  # use exponential moving average
                     exponential_average_factor = self.momentum
 
-        qinput = self.quantizer(input)
+        # qinput = self.quantize_and_measure(input)
+        qinput = input
         weight_qparams = calculate_qparams(self.weight, num_bits=self.num_bits)
         qweight = quantize(self.weight, qparams=weight_qparams)
 
@@ -200,12 +203,11 @@ class QReLU6(nn.Module):
         super().__init__()
         self.num_bits = num_bits
         self.inplace = inplace
-        self.quantizer = QuantMeasure(self.num_bits)
 
     def forward(self, x):
         if self.inplace:
             out = x.clamp(0, 2 ** self.num_bits)
         else:
             out = torch.clamps(x, 0, 2 ** self.num_bits)
-        qout = self.quantizer(out)
+        qout = quantize(out, self.num_bits)
         return qout
