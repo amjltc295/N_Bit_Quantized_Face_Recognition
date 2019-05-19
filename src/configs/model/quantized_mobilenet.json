@@ -1,11 +1,11 @@
 {
-    "name": "QuantizedMobileNet",
+    "name": "QuantizedMobileNet_ArcFace",
     "arch": {
         "type": "FaceRecognitionModel",
         "args": {
             "backbone": "QuantizedMobileNet",
-            "head": "Softmax",
-            "width": 0.5
+            "head": "ArcFace",
+            "width": 1
         }
     }
 }
