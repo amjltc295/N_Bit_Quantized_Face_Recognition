@@ -37,6 +37,38 @@ CUDA_VISIBLE_DEVICES=0 python train.py -c configs/basic/config.json configs/data
 CUDA_VISIBLE_DEVICES=1 python train.py -c configs/basic/config.json configs/dataset/ms1m.json configs/model/face_recognition.json configs/loss/config.json -p ../pretrained_weights/backbone_ir50_ms1m_epoch120.pth
 ```
 
+## Testing
+
+1. Run pytest
+```
+cd tests
+pytest
+```
+
+2. Test inference (not done)
+```
+CUDA_VISIBLE_DEVICES=0 python test.py -c saved_new/models/8BitQuantized_ms1m_align_112_b512_QuantizedMobileNetV2withFCnoQinput_Softmax/0519_155905/config.json configs/dataset/test_lfw.json -r saved_new/models/8BitQuantized_ms1m_align_112_b512_QuantizedMobileNetV2withFCnoQinput_Softmax/0519_155905/checkpoint-epoch3.pth
+```
+
+## Results
+|Backbone|Head|Dataset| Training Accuracy| Validation Accuracy|Note|
+|-----|--|---|---|---|---|
+|IR_50|ArcFace|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned 112x112| ~100%|~99%|State-of-the-art model. Load the pretrained model from [https://github.com/ZhaoJ9014/face.evoLVe.PyTorch](https://github.com/ZhaoJ9014/face.evoLVe.PyTorch)|
+|MobileNetV2|Softmax|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned 112x112|~90%|~86%|Baseline, train from scratch. The is a FC in the backbone.|
+|QuantizedMobileNetV2|Softmax|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned  112x112|~85%|~83%|Apply the quantization for training in [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference](https://arxiv.org/pdf/1712.05877.pdf) on MobileNetV2
+
+The implemented quantized model performs a bit worse than the original one for floating point inference, as expected.
+It should have better performance when both models are quantized. However, as Integer-Arithmetic-Only Inference it not yet implemented here, the result needs further verfication.
+Note that some of the following models may not converge yet.
+
+
+## TODOs
+* [ ] Implement Integer-Arithmetic-Only Inference and verify the benefit of quantizated training
+* [ ] Evaluate on the LFW dataset
+* [ ] Train with ArcFace Head
+* [ ] Add comparison/test with TensorflowLite Fake Quantization module
+* [ ] Add more unit tests for quantization
+
 ## Repository Structure
 ```
 ├── .flake8                 Syntax and style settings for Flake8
@@ -92,3 +124,4 @@ This project is based on the following sources:
 * https://github.com/victoresque/pytorch-template
 * https://github.com/amjltc295/PythonRepoTemplate
 * https://github.com/eladhoffer/convNet.pytorch
+* https://github.com/tonylins/pytorch-mobilenet-v2
