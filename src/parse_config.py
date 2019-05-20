@@ -29,6 +29,12 @@ class ConfigParser:
             self.resume = None
             # self.cfg_fname = Path(args.config)
 
+        self.log_levels = {
+            0: logging.WARNING,
+            1: logging.INFO,
+            2: logging.DEBUG
+        }
+
         self.args = args
         self.__config = {}
         # load config file and apply custom cli options
@@ -50,11 +56,6 @@ class ConfigParser:
         write_json(self.config, self.save_dir / 'config.json')
 
         setup_logging(self.log_dir)
-        self.log_levels = {
-            0: logging.WARNING,
-            1: logging.INFO,
-            2: logging.DEBUG
-        }
 
     def initialize(self, name, module, *args):
         """
