@@ -1,3 +1,5 @@
+import torch
+
 from base import BaseModel
 import model.backbone as backbones
 import model.head as heads
@@ -26,3 +28,12 @@ class FaceRecognitionModel(BaseModel):
         features = self.get_features(x)
         out = self.head(features, labels)
         return out
+
+    def load_backbone(self, checkpoint):
+        state_dict = checkpoint['state_dict']
+        used_state_dict = {}
+        for k, v in state_dict.items():
+            if 'backbone' in k:
+                used_state_dict[k] = v
+
+        self.load_state_dict(used_state_dict, strict=False)
