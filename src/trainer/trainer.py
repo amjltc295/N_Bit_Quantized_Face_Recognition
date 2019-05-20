@@ -76,7 +76,7 @@ class Trainer(BaseTrainer):
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         self.writer.set_step(epoch, 'train_epoch')
-        self.writer.add_scalar('train_acc', total_metrics[0])
+        self.writer.add_scalar('train_acc', total_metrics[0] / len(self.data_loader))
         log = {
             'loss': total_loss / len(self.data_loader),
             'metrics': (total_metrics / len(self.data_loader)).tolist()
@@ -117,7 +117,7 @@ class Trainer(BaseTrainer):
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         self.writer.set_step(epoch, 'valid_epoch')
-        self.writer.add_scalar('val_acc', total_val_metrics[0])
+        self.writer.add_scalar('val_acc', total_val_metrics[0] / len(self.valid_data_loader))
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
