@@ -66,7 +66,7 @@ def quantize(
 
 
 class QuantMeasure(nn.Module):
-    """docstring for QuantMeasure."""
+    """ To quanitze parameters and measure and runtime min and max """
 
     def __init__(self, num_bits=8, shape_measure=(1,), inplace=False, momentum=0.1):
         super(QuantMeasure, self).__init__()
@@ -152,7 +152,9 @@ class QLinear(nn.Linear):
         return output
 
 
+# Based on PyTorch source code
 class QBatchNorm2d(nn.BatchNorm2d):
+    """ Quantized 2D Batch Normalization """
     def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True,
                  track_running_stats=True, num_bits=8, num_bits_bias=32):
         super(QBatchNorm2d, self).__init__(
@@ -199,6 +201,9 @@ class QBatchNorm2d(nn.BatchNorm2d):
 
 
 class QReLU6(nn.Module):
+    """ Quantized ReLU6.
+
+    It is merely clamping and quantization. """
     def __init__(self, num_bits=8, inplace=True):
         super().__init__()
         self.num_bits = num_bits
