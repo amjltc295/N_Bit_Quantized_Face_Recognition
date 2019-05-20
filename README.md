@@ -51,11 +51,11 @@ CUDA_VISIBLE_DEVICES=0 python test.py -c saved_new/models/8BitQuantized_ms1m_ali
 ```
 
 ## Results
-|Backbone|Head|Dataset| Training Accuracy| Validation Accuracy|Note|
-|-----|--|---|---|---|---|
-|IR_50|ArcFace|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned 112x112| ~100%|~99%|State-of-the-art model. Load the pretrained model from [https://github.com/ZhaoJ9014/face.evoLVe.PyTorch](https://github.com/ZhaoJ9014/face.evoLVe.PyTorch)|
-|MobileNetV2|Softmax|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned 112x112|~90%|~86%|Baseline, train from scratch. The is a FC in the backbone.|
-|QuantizedMobileNetV2|Softmax|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned  112x112|~85%|~83%|Apply the quantization for training in [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference](https://arxiv.org/pdf/1712.05877.pdf) on MobileNetV2
+|Backbone|Head|Dataset| Training Accuracy| Validation Accuracy|Training Progress|Note|
+|-----|--|---|---|---|---|---|
+|IR_50|ArcFace|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned 112x112| ~100%|~99%|![IR_50](doc/IR50ArcFaceLoadPretrained.png)|State-of-the-art model. Load the pretrained model from [https://github.com/ZhaoJ9014/face.evoLVe.PyTorch](https://github.com/ZhaoJ9014/face.evoLVe.PyTorch)|
+|MobileNetV2|Softmax|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned 112x112|~90%|~86%|![MobileNetV2](doc/MobileNetV2Softmax.png)|Baseline, train from scratch. The is a FC in the backbone.|
+|QuantizedMobileNetV2|Softmax|[MS-Celeb-1M](https://arxiv.org/pdf/1607.08221.pdf) aligned  112x112|~85%|~83%|![QMobileNetV2](doc/QMobileNetV2Softmax.png)|Apply the quantization for training in [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference](https://arxiv.org/pdf/1712.05877.pdf) on MobileNetV2
 
 The implemented quantized model performs a bit worse than the original one for floating point inference, as expected.
 It should have better performance when both models are quantized. However, as Integer-Arithmetic-Only Inference it not yet implemented here, the result needs further verfication.
@@ -81,6 +81,7 @@ Note that some of the following models may not converge yet.
 ├── tests/                  For tests
 ├── lib/                    For third-party libraries
 ├── pretrained_weights/     For pretrained backbones
+├── doc/
 ├── src/
 │   ├── base/
 │   ├── configs/            For training, each group of config should be loaded
