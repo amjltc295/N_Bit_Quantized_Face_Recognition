@@ -4,13 +4,13 @@
     "disable_existing_loggers": false, 
     "formatters": {
         "simple": {"format": "%(message)s"}, 
-        "datetime": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+        "datetime": {"format": "[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s"}
     }, 
     "handlers": {
         "console": {
             "class": "logging.StreamHandler", 
             "level": "DEBUG", 
-            "formatter": "simple", 
+            "formatter": "datetime", 
             "stream": "ext://sys.stdout"
             }, 
         "info_file_handler": {

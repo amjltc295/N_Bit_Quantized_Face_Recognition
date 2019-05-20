@@ -1,11 +1,11 @@
 {
-    "name": "MobileNetV2withFC_ArcFace",
+    "name": "QuantizedMobileNet_ArcFace",
     "arch": {
         "type": "FaceRecognitionModel",
         "args": {
-            "backbone": "MobileNetV2",
+            "backbone": "QuantizedMobileNet",
             "head": "ArcFace",
-            "input_channel": 32
+            "width": 1
         }
     }
 }

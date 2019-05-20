@@ -1,0 +1,11 @@
+{
+    "name": "QuantizedMobileNetV2withFC_Softmax",
+    "arch": {
+        "type": "FaceRecognitionModel",
+        "args": {
+            "backbone": "QuantizedMobileNetV2",
+            "head": "Softmax",
+            "input_channel": 32
+        }
+    }
+}

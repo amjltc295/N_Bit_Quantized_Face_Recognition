@@ -1,10 +1,10 @@
 {
-    "name": "ms1m_align_112_b256",
+    "name": "ms1m_align_112_b200",
     "data_loader": {
         "type": "LFWDataLoader",
         "args":{
             "data_dir": "../datasets/ms1m_align_112/",
-            "batch_size": 256,
+            "batch_size": 200,
             "n_class": 85742,
             "shuffle": true,
             "validation_split": 0.1,

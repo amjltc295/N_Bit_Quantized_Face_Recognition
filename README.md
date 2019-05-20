@@ -48,7 +48,35 @@ CUDA_VISIBLE_DEVICES=1 python train.py -c configs/basic/config.json configs/data
 ├── .github/                For the PR template
 ├── tests/                  For tests
 ├── lib/                    For third-party libraries
-└── src/                    For source code
+├── pretrained_weights/     For pretrained backbones
+├── src/
+│   ├── base/
+│   ├── configs/            For training, each group of config should be loaded
+│   │   ├── basic/
+│   │   ├── dataset/
+│   │   ├── loss/
+│   │   └── model/
+│   ├── data_loader
+│   │   └── data_loaders.py
+│   ├── logger/
+│   │   ├── logger.py
+│   │   ├── logger_config.json
+│   │   └── visualization.py
+│   ├── model/
+│   │   ├── backbone/       Backbones to extract face features
+│   │   ├── head/           Loss heads for metric learning
+│   │   ├── loss.py
+│   │   ├── metric.py
+│   │   └── model.py
+│   ├── parse_config.py
+│   ├── test.py
+│   ├── train.py
+│   ├── trainer/
+│   │   └── trainer.py
+│   └── utils/
+│       └── util.py
+└── tests/
+    └── test_quantization.py
 
 ```
 ## License
@@ -63,3 +91,4 @@ This project is based on the following sources:
 * https://github.com/eladhoffer/quantized.pytorch
 * https://github.com/victoresque/pytorch-template
 * https://github.com/amjltc295/PythonRepoTemplate
+* https://github.com/eladhoffer/convNet.pytorch

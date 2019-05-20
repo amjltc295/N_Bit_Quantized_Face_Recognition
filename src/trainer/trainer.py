@@ -49,6 +49,10 @@ class Trainer(BaseTrainer):
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
         for batch_idx, (data, target) in enumerate(self.data_loader):
+            # A dirty fix for the bug of RangeBN
+            if data.shape[0] != self.data_loader.batch_size:
+                continue
+
             data, target = data.to(self.device), target.to(self.device)
 
             self.optimizer.zero_grad()
@@ -71,6 +75,8 @@ class Trainer(BaseTrainer):
                     loss.item()))
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
+        self.writer.set_step(epoch, 'train_epoch')
+        self.writer.add_scalar('train_acc', total_metrics[0] / len(self.data_loader))
         log = {
             'loss': total_loss / len(self.data_loader),
             'metrics': (total_metrics / len(self.data_loader)).tolist()
@@ -110,6 +116,8 @@ class Trainer(BaseTrainer):
                 total_val_metrics += self._eval_metrics(output, target)
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
+        self.writer.set_step(epoch, 'valid_epoch')
+        self.writer.add_scalar('val_acc', total_val_metrics[0] / len(self.valid_data_loader))
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins='auto')
